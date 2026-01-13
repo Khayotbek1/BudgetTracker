@@ -20,3 +20,11 @@ class IncomeSafeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Income
         fields = '__all__'
+
+class ExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Expense
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'required': False},
+        }
