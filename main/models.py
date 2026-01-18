@@ -1,12 +1,12 @@
 from django.db import models
 from django.conf import settings
+from parler.models import TranslatableModel, TranslatedFields
 
-user = settings.AUTH_USER_MODEL
+User = settings.AUTH_USER_MODEL
 
 class BaseModel(models.Model):
-    user = models.ForeignKey(user, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    source = models.CharField(max_length=255, null=True, blank=True)
     date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -17,11 +17,15 @@ class BaseModel(models.Model):
         return f"{self.user.username} - {self.amount}"
 
 
-class Income(BaseModel):
-    pass
+class Income(BaseModel, TranslatableModel):
+    translations = TranslatedFields(
+        source=models.CharField(max_length=255, null=True, blank=True),
+    )
 
-class Expense(BaseModel):
-    pass
+class Expense(BaseModel, TranslatableModel):
+    translations = TranslatedFields(
+        source=models.CharField(max_length=255, null=True, blank=True),
+    )
 
 
 

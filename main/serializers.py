@@ -1,30 +1,45 @@
 from rest_framework import serializers
-from .models import *
+from parler_rest.serializers import TranslatableModelSerializer
+from .models import Income, Expense
 from users.serializers import ProfileSerializer
 
 
-class IncomeSerializer(serializers.ModelSerializer):
+class IncomeSerializer(TranslatableModelSerializer):
+    source = serializers.CharField(read_only=True)
+
     class Meta:
         model = Income
-        fields = '__all__'
+        fields = ("id", "amount", "source", "date", "created_at")
 
-class IncomeCreateSerializer(serializers.ModelSerializer):
+
+class IncomeCreateSerializer(TranslatableModelSerializer):
+    translations = serializers.DictField(write_only=True)
+
     class Meta:
         model = Income
-        fields = ('id', 'amount', 'source', 'date', 'created_at')
+        fields = ("amount", "date", "translations")
 
 
-
-class IncomeSafeSerializer(serializers.ModelSerializer):
+class IncomeSafeSerializer(TranslatableModelSerializer):
     user = ProfileSerializer(read_only=True)
+    source = serializers.CharField(read_only=True)
+
     class Meta:
         model = Income
-        fields = '__all__'
+        fields = "__all__"
 
-class ExpenseSerializer(serializers.ModelSerializer):
+
+class ExpenseSerializer(TranslatableModelSerializer):
+    source = serializers.CharField(read_only=True)
+
     class Meta:
         model = Expense
-        fields = '__all__'
-        extra_kwargs = {
-            'user': {'required': False},
-        }
+        fields = ("id", "amount", "source", "date", "created_at")
+
+
+class ExpenseCreateSerializer(TranslatableModelSerializer):
+    translations = serializers.DictField(write_only=True)
+
+    class Meta:
+        model = Expense
+        fields = ("amount", "date", "translations")

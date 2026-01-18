@@ -9,49 +9,27 @@ from rest_framework.pagination import PageNumberPagination
 from .serializers import *
 
 class IncomeListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Income.objects.all()
     permission_classes = [IsAuthenticated]
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ['source']
+    search_fields = ['translations__source']
     ordering_fields = ['amount', 'date', 'created_at']
     pagination_class = PageNumberPagination
-    page_size = 5
 
-    @swagger_auto_schema(
-        tags=['api'],
-        manual_parameters=[
-            openapi.Parameter(
-                name='ordering',
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                description='Ordering amount, date, created_at',
-                enum=['amount', '-amount', 'date', '-date' 'created_at', '-created_at'],
-            )
-        ]
-    )
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    @swagger_auto_schema(
-        tags=['api'],
-    )
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
+    def get_queryset(self):
+        return Income.objects.filter(user=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
             return IncomeSafeSerializer
         return IncomeCreateSerializer
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
     def perform_create(self, serializer):
         user = self.request.user
-        user.balance += serializer.validated_data['amount']
+        amount = serializer.validated_data['amount']
+        user.balance += amount
         user.save()
-        serializer.save(user=self.request.user)
+        serializer.save(user=user)
+
 
 
 class ExpenseListCreateAPIView(APIView):
